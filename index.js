@@ -6,7 +6,7 @@ const {
 
 async function startBot() {
 
-  console.log("🚀 BOT WHATSAPP START")
+  console.log("🚀 BOT RENDER START")
 
   const { state, saveCreds } =
     await useMultiFileAuthState("./session")
@@ -17,6 +17,7 @@ async function startBot() {
   const sock = makeWASocket({
     auth: state,
     version,
+    printQRInTerminal: true,
     browser: ["Render", "Chrome", "Linux"]
   })
 
@@ -24,11 +25,16 @@ async function startBot() {
 
   sock.ev.on("connection.update", (update) => {
 
-    const { connection, qr } = update
+    const { connection, lastDisconnect } = update
 
-    if (qr) {
-      console.log("📱 SCAN QR CODE :")
-      console.log(qr)
+    // 🔥 IMPORTANT : QR LOG STABLE
+    if (update.qr) {
+      console.log("\n📱 QR CODE WHATSAPP :\n")
+      console.log(update.qr)
+    }
+
+    if (connection === "connecting") {
+      console.log("🔄 Connexion en cours...")
     }
 
     if (connection === "open") {
@@ -36,7 +42,9 @@ async function startBot() {
     }
 
     if (connection === "close") {
-      console.log("❌ BOT STOP")
+      console.log("❌ CONNEXION FERMÉE")
+
+      console.log("Cause :", lastDisconnect?.error)
     }
   })
 
